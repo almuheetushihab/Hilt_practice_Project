@@ -1,50 +1,59 @@
 package com.example.hiltpracticeproject
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
-import android.widget.TextView
+import com.bumptech.glide.Glide
 
-import com.example.hiltpracticeproject.placeholder.PlaceholderContent.PlaceholderItem
 import com.example.hiltpracticeproject.databinding.AdapterEmployeeBinding
+import com.example.hiltpracticeproject.model.EmployeeResponseItem
+import javax.inject.Inject
 
-/**
- * [RecyclerView.Adapter] that can display a [PlaceholderItem].
- * TODO: Replace the implementation with code for your data type.
- */
-class EmployeeAdapter(
-    private val values: List<PlaceholderItem>
+
+class EmployeeAdapter @Inject constructor(
+
 ) : RecyclerView.Adapter<EmployeeAdapter.ViewHolder>() {
+    private lateinit var employeeList: ArrayList<EmployeeResponseItem>
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-
-        return ViewHolder(
-            AdapterEmployeeBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-        )
-
+    companion object {
+        var listener: ItemClickListener? = null
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = values[position]
-        holder.idView.text = item.id
-        holder.contentView.text = item.content
+    class ViewHolder(var binding: AdapterEmployeeBinding) : RecyclerView.ViewHolder(binding.root)
+
+    override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
+        val binding =
+            AdapterEmployeeBinding.inflate(LayoutInflater.from(viewGroup.context), viewGroup, false)
+        return ViewHolder(binding)
     }
 
-    override fun getItemCount(): Int = values.size
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        val employee = employeeList[position]
+        val imageUrl =
+            "https://plus.unsplash.com/premium_photo-1664536392896-cd1743f9c02c?q=80&w=320"
+        Glide.with(viewHolder.itemView.context)
+            .load(imageUrl)
+            .circleCrop()
+            .into(viewHolder.binding.ivEmployeeImg)
 
-    inner class ViewHolder(binding: AdapterEmployeeBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-        val idView: TextView = binding.itemNumber
-        val contentView: TextView = binding.content
-
-        override fun toString(): String {
-            return super.toString() + " '" + contentView.text + "'"
+        viewHolder.binding.tvEmployeeName.text = employee.name
+        viewHolder.binding.ivEmployeeNum.text = employee.phone
+        viewHolder.itemView.setOnClickListener {
+            listener?.onItemClick(employee.id)
         }
     }
+
+    override fun getItemCount(): Int {
+        return employeeList.size
+    }
+
+    interface ItemClickListener {
+        fun onItemClick(id: Int)
+    }
+
+    fun setEmployeeList(list: ArrayList<EmployeeResponseItem>) {
+        this.employeeList = list
+    }
+
 
 }
